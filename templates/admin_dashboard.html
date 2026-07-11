@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <a href="/admin/logout" class="btn-logout">Logout</a>
+    </div>
+
+    <!-- Categories Management -->
+    <div class="dashboard-section">
+        <h2>Manage Categories</h2>
+        <div class="category-manager">
+            <div class="category-input">
+                <input type="text" id="new-category-name" placeholder="New category name" />
+                <button id="add-category-btn" class="btn-primary">Add Category</button>
+            </div>
+            <ul id="category-list" class="category-list">
+                <li style="text-align:center; color:#888; padding:1rem 0;">No categories yet. Add one above!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Products Management -->
+    <div class="dashboard-section">
+        <h2>Manage Products</h2>
+        <div class="dashboard-actions">
+            <button id="add-product-btn" class="btn-primary">+ Add New Product</button>
+        </div>
+
+        <div id="product-table-container">
+            <table id="product-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price (KSh)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="product-table-body">
+                    <!-- Rows injected via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Add Product</h2>
+            <form id="product-form" enctype="multipart/form-data">
+                <input type="hidden" id="product-id" />
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="product-name" required />
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="product-category" required>
+                        <!-- Populated dynamically from categories -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (KSh)</label>
+                    <input type="number" step="0.01" id="product-price" required />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="product-description" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image (Upload file <em>or</em> paste URL below)</label>
+                    <input type="file" id="product-image-file" accept="image/*" />
+                </div>
+                <div class="form-group">
+                    <label>Image URL (optional if file uploaded)</label>
+                    <input type="url" id="product-image-url" placeholder="https://..." />
+                </div>
+                <button type="submit" class="btn-primary">Save Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero" style="background-image: url('{{ url_for('static', filename='images/image1.jpg') }}'); background-size: cover; background-position: center; position: relative;">
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <h1>Welcome to <span class="highlight">Vinny Emporium</span></h1>
+        <p>Your one‑stop shop for the latest phones, Chargers, and gadgets.</p>
+        <a href="/catalogue" class="btn-primary">Browse Catalogue</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-grid">
+        <div class="feature-card">
+            <i class="fas fa-phone-alt"></i>
+            <h3>Latest Phones</h3>
+            <p>Flagship models from Apple, Samsung, and more.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-laptop"></i>
+            <h3>Premium Laptops</h3>
+            <p>Powerful machines for work and play.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-headphones"></i>
+            <h3>Audio Gear</h3>
+            <p>High‑quality headphones and speakers.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fab fa-whatsapp"></i>
+            <h3>Order via WhatsApp</h3>
+            <p>Quick and easy – just tap and chat.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Contact & Location Section ===== -->
+<section class="contact-section">
+    <div class="contact-container">
+        <div class="contact-header">
+            <h2>Get in Touch</h2>
+            <p>Reach out to us on social media, or come visit our store!</p>
+        </div>
+
+        <div class="contact-grid">
+            <!-- Left Column: Social Media -->
+            <div class="contact-socials">
+                <div class="social-card">
+                    <a href="https://wa.me/254727552507" target="_blank" class="social-btn whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@vinny.emporium" target="_blank" class="social-btn tiktok">
+                        <i class="fab fa-tiktok"></i>
+                        <span>TikTok</span>
+                    </a>
+                    <a href="https://www.instagram.com/vinnyemporium" target="_blank" class="social-btn instagram">
+                        <i class="fab fa-instagram"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://web.facebook.com/emporiumvinny" target="_blank" class="social-btn facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </a>
+                </div>
+                <div class="quick-contact">
+                    <p><i class="fas fa-envelope"></i> info@vinnyemporium.com</p>
+                    <p><i class="fas fa-phone-alt"></i> +254 727 552 507</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Google Maps Location -->
+            <div class="contact-location">
+                <h3>Our Store Location</h3>
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d255282.358537437!2d36.68219672286856!3d-1.3028613789588112!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf0254b297924c!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2sus!4v1690000000000!5m2!1sen!2sus" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <a href="https://maps.app.goo.gl/7ryvMKWjJz63rrhbA" target="_blank" class="map-link">
+                    <i class="fas fa-map-pin"></i> Open in Google Maps
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
