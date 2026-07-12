@@ -74,6 +74,7 @@ function renderCatalogue(products, categoryFilter = 'all') {
         return;
     }
 
+    // 4. Render HTML with direct WhatsApp number
     grid.innerHTML = filtered.map(p => `
         <div class="product-card" data-category="${p.category}">
             <img src="${p.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
@@ -83,7 +84,7 @@ function renderCatalogue(products, categoryFilter = 'all') {
                 <span class="product-category">${p.category}</span>
                 <div class="product-price">KSh ${Number(p.price).toFixed(2)}</div>
                 <p class="product-desc">${p.description || ''}</p>
-                <a href="https://wa.me/?text=Hi%20Vinny%20Emporium!%20I%20want%20to%20order%20${encodeURIComponent(p.name)}%20for%20KSh%20${Number(p.price).toFixed(2)}" 
+                <a href="https://wa.me/254727552507?text=Hi%20Vinny%20Emporium!%20I%20want%20to%20order%20${encodeURIComponent(p.name)}%20for%20KSh%20${Number(p.price).toFixed(2)}" 
                    target="_blank" 
                    class="whatsapp-btn">
                     <i class="fab fa-whatsapp"></i> Order via WhatsApp
@@ -315,15 +316,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         await fetchCategories();
         await fetchProducts();
         buildCategoryFilters();
-        setupSearch(); // Initialize the search logic
-        renderCatalogue(allProducts, 'all'); // Load with shuffled 'All' by default
+        setupSearch(); 
+        renderCatalogue(allProducts, 'all'); 
     }
 
     // Admin dashboard
     if (document.getElementById('product-table-body')) {
         await loadAllAdminData();
 
-        // Add category button
         const addCatBtn = document.getElementById('add-category-btn');
         if (addCatBtn) {
             addCatBtn.addEventListener('click', async function() {
@@ -349,11 +349,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
 
-        // Add product button
         const addBtn = document.getElementById('add-product-btn');
         if (addBtn) addBtn.addEventListener('click', openAddModal);
 
-        // Modal close
         const closeBtn = document.querySelector('.close-modal');
         const modal = document.getElementById('product-modal');
         if (closeBtn) closeBtn.addEventListener('click', () => modal.style.display = 'none');
@@ -361,7 +359,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (e.target === modal) modal.style.display = 'none';
         });
 
-        // Form submit
         const form = document.getElementById('product-form');
         if (form) form.addEventListener('submit', handleProductSubmit);
     }
