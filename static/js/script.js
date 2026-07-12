@@ -65,27 +65,56 @@ function renderCatalogue(products, categoryFilter = 'all') {
     `).join('');
 }
 
-// ===== Catalogue: Build Category Filters =====
+// ===== Catalogue: Build Category Filters (Buttons + Dropdown) =====
 function buildCategoryFilters() {
     const container = document.getElementById('category-filters');
-    if (!container) return;
+    const dropdown = document.getElementById('category-dropdown');
+    if (!container || !dropdown) return;
 
+    // 1. Clear and reset to default "All"
     container.innerHTML = `<button class="filter-btn active" data-category="all">All</button>`;
+    dropdown.innerHTML = `<option value="all">All</option>`;
+
+    // 2. Populate both from fetched categories
     allCategories.forEach(cat => {
+        // Desktop Button
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
         btn.dataset.category = cat.name;
         btn.textContent = cat.name;
         container.appendChild(btn);
+
+        // Mobile Dropdown Option
+        const opt = document.createElement('option');
+        opt.value = cat.name;
+        opt.textContent = cat.name;
+        dropdown.appendChild(opt);
     });
 
-    // Event listeners
+    // 3. Shared filtering logic
+    const filterProducts = (category) => {
+        // Sync buttons
+        container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = container.querySelector(`.filter-btn[data-category="${category}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Sync dropdown
+        dropdown.value = category;
+
+        // Render the filtered products
+        renderCatalogue(allProducts, category);
+    };
+
+    // 4. Event Listeners for Buttons
     container.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            renderCatalogue(allProducts, this.dataset.category);
+            filterProducts(this.dataset.category);
         });
+    });
+
+    // 5. Event Listener for Mobile Dropdown
+    dropdown.addEventListener('change', function() {
+        filterProducts(this.value);
     });
 }
 
