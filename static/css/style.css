@@ -734,3 +734,31 @@ footer {
     padding: 0.5rem;     /* Adds a small padding around the image */
     border-radius: 8px 8px 0 0;
 }
+/* ===== Search Bar ===== */
+.search-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 1.5rem auto 0 auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    font-size: 1rem;
+    background: var(--white);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 168, 107, 0.15);
+}
+
+@media (max-width: 768px) {
+    .search-container {
+        max-width: 100%;
+    }
+}

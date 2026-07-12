@@ -3,6 +3,19 @@ const API_BASE = '/api/products';
 const CAT_API_BASE = '/api/categories';
 let allProducts = [];
 let allCategories = [];
+let currentCategory = 'all'; // Track which category is active
+let currentSearchTerm = ''; // Track the search text
+
+// ===== Helper: Shuffle Array (Fisher-Yates) =====
+function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
 
 // ===== Fetch Categories =====
 async function fetchCategories() {
@@ -37,12 +50,27 @@ function renderCatalogue(products, categoryFilter = 'all') {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
 
-    const filtered = categoryFilter === 'all'
-        ? products
+    // 1. Filter by Category
+    let filtered = categoryFilter === 'all'
+        ? products.slice() // Create a copy
         : products.filter(p => p.category === categoryFilter);
 
+    // 2. If viewing 'All', Shuffle the products to mix categories randomly
+    if (categoryFilter === 'all') {
+        filtered = shuffleArray(filtered);
+    }
+
+    // 3. Filter by Search Term (if any)
+    if (currentSearchTerm.trim() !== '') {
+        const term = currentSearchTerm.toLowerCase();
+        filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(term) || 
+            (p.description && p.description.toLowerCase().includes(term))
+        );
+    }
+
     if (filtered.length === 0) {
-        grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No products found.</p>`;
+        grid.innerHTML = `<p style="text-align:center; grid-column:1/-1; padding:2rem;">No products found matching your search.</p>`;
         return;
     }
 
@@ -93,6 +121,7 @@ function buildCategoryFilters() {
 
     // 3. Shared filtering logic
     const filterProducts = (category) => {
+        currentCategory = category; // Update global tracking
         // Sync buttons
         container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         const activeBtn = container.querySelector(`.filter-btn[data-category="${category}"]`);
@@ -118,18 +147,28 @@ function buildCategoryFilters() {
     });
 }
 
+// ===== Catalogue: Search Logic =====
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function() {
+        currentSearchTerm = this.value;
+        // Re-render based on the current category and new search term
+        renderCatalogue(allProducts, currentCategory);
+    });
+}
+
 // ===== Admin Dashboard: Render Categories List =====
 function renderCategoryList() {
     const list = document.getElementById('category-list');
     if (!list) return;
 
-    // If no categories, show the placeholder
     if (allCategories.length === 0) {
         list.innerHTML = `<li style="text-align:center; color:#888; padding:1rem 0;">No categories yet. Add one above!</li>`;
         return;
     }
 
-    // Otherwise render the category list
     list.innerHTML = allCategories.map(cat => `
         <li>
             <span>${cat.name}</span>
@@ -209,11 +248,11 @@ function openEditModal(id) {
     document.getElementById('modal-title').textContent = 'Edit Product';
     document.getElementById('product-id').value = product.id;
     document.getElementById('product-name').value = product.name;
-    document.getElementById('product-category').value = product.category_id; // select by id
+    document.getElementById('product-category').value = product.category_id;
     document.getElementById('product-price').value = product.price;
     document.getElementById('product-description').value = product.description || '';
     document.getElementById('product-image-url').value = product.image_url || '';
-    document.getElementById('product-image-file').value = ''; // clear file input
+    document.getElementById('product-image-file').value = '';
     document.getElementById('product-modal').style.display = 'flex';
 }
 
@@ -276,7 +315,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         await fetchCategories();
         await fetchProducts();
         buildCategoryFilters();
-        renderCatalogue(allProducts);
+        setupSearch(); // Initialize the search logic
+        renderCatalogue(allProducts, 'all'); // Load with shuffled 'All' by default
     }
 
     // Admin dashboard
