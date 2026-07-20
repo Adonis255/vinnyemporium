@@ -36,6 +36,7 @@
                         <th>Name</th>
                         <th>Category</th>
                         <th>Price (KSh)</th>
+                        <th>Images</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -71,15 +72,20 @@
                     <label>Description</label>
                     <textarea id="product-description" rows="2"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Image (Upload file <em>or</em> paste URL below)</label>
-                    <input type="file" id="product-image-file" accept="image/*" />
+                
+                <div class="form-group" style="border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+                    <label><strong>Front Image</strong> (Upload file <em>or</em> paste URL)</label>
+                    <input type="file" id="product-image-front-file" accept="image/*" />
+                    <input type="url" id="product-image-front-url" placeholder="https://..." style="margin-top:0.5rem;" />
                 </div>
-                <div class="form-group">
-                    <label>Image URL (optional if file uploaded)</label>
-                    <input type="url" id="product-image-url" placeholder="https://..." />
+
+                <div class="form-group" style="border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+                    <label><strong>Back Image</strong> (Optional - Upload file <em>or</em> paste URL)</label>
+                    <input type="file" id="product-image-back-file" accept="image/*" />
+                    <input type="url" id="product-image-back-url" placeholder="https://..." style="margin-top:0.5rem;" />
                 </div>
-                <button type="submit" class="btn-primary">Save Product</button>
+
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Product</button>
             </form>
         </div>
     </div>

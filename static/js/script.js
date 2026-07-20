@@ -45,6 +45,86 @@ async function fetchProducts() {
     }
 }
 
+// ===== INTERNAL SLIDER LOGIC =====
+function goToSlide(slider, idx) {
+    const imgs = slider.querySelectorAll('.product-img');
+    const dots = slider.querySelectorAll('.dot');
+    imgs.forEach(img => img.classList.remove('active-img'));
+    dots.forEach(d => d.classList.remove('active'));
+    imgs[idx].classList.add('active-img');
+    if (dots[idx]) dots[idx].classList.add('active');
+    return idx;
+}
+
+// ===== SETUP AUTO-SLIDER & CONTROLS =====
+function setupSlider(slider) {
+    const imgs = slider.querySelectorAll('.product-img');
+    if (imgs.length < 2) return;
+    
+    const prevBtn = slider.querySelector('.slider-nav.prev');
+    const nextBtn = slider.querySelector('.slider-nav.next');
+    let currentIdx = 0;
+    let intervalId = null;
+
+    function startAutoPlay() {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = setInterval(() => {
+            currentIdx = (currentIdx + 1) % imgs.length;
+            goToSlide(slider, currentIdx);
+        }, 3000);
+    }
+    function stopAutoPlay() { if (intervalId) { clearInterval(intervalId); intervalId = null; } }
+    function resetAutoPlay() { stopAutoPlay(); startAutoPlay(); }
+
+    // Manual Arrows
+    prevBtn.addEventListener('click', () => {
+        currentIdx = (currentIdx - 1 + imgs.length) % imgs.length;
+        goToSlide(slider, currentIdx);
+        resetAutoPlay();
+    });
+    nextBtn.addEventListener('click', () => {
+        currentIdx = (currentIdx + 1) % imgs.length;
+        goToSlide(slider, currentIdx);
+        resetAutoPlay();
+    });
+
+    // Dots
+    slider.querySelectorAll('.dot').forEach((dot, idx) => {
+        dot.addEventListener('click', function() {
+            currentIdx = idx;
+            goToSlide(slider, idx);
+            resetAutoPlay();
+        });
+    });
+
+    // Mobile Touch Swipe (Left/Right drag)
+    let startX = 0;
+    slider.addEventListener('touchstart', (e) => { startX = e.changedTouches[0].screenX; });
+    slider.addEventListener('touchend', (e) => {
+        let endX = e.changedTouches[0].screenX;
+        let diff = startX - endX;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0) { // Swipe Left -> Next
+                currentIdx = (currentIdx + 1) % imgs.length;
+            } else { // Swipe Right -> Prev
+                currentIdx = (currentIdx - 1 + imgs.length) % imgs.length;
+            }
+            goToSlide(slider, currentIdx);
+            resetAutoPlay();
+        }
+    });
+
+    // Global override for HTML 'onclick' dots so they reset the timer properly
+    window.switchImg = function(element, idx) {
+        const slider = element.closest('.img-slider');
+        if (!slider) return;
+        const dot = slider.querySelectorAll('.dot')[idx];
+        if (dot) dot.click();
+    };
+
+    startAutoPlay();
+}
+
 // ===== Render Catalogue =====
 function renderCatalogue(products, categoryFilter = 'all') {
     const grid = document.getElementById('products-grid');
@@ -74,11 +154,30 @@ function renderCatalogue(products, categoryFilter = 'all') {
         return;
     }
 
-    // 4. Render HTML with direct WhatsApp number
-    grid.innerHTML = filtered.map(p => `
+    // 4. Render HTML with Image Slider + Arrows + Dots
+    grid.innerHTML = filtered.map(p => {
+        let imgHtml = `<img src="${p.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${p.name}" class="product-img active-img" />`;
+        let controlsHtml = '';
+        
+        // If Back image exists, add it, arrows, and the dots
+        if (p.image_url_back) {
+            imgHtml += `<img src="${p.image_url_back}" alt="${p.name} back" class="product-img" />`;
+            controlsHtml = `
+                <button class="slider-nav prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-nav next"><i class="fas fa-chevron-right"></i></button>
+                <div class="slider-dots">
+                    <span class="dot active" onclick="switchImg(this, 0)"></span>
+                    <span class="dot" onclick="switchImg(this, 1)"></span>
+                </div>
+            `;
+        }
+
+        return `
         <div class="product-card" data-category="${p.category}">
-            <img src="${p.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
-                 alt="${p.name}" class="product-img" loading="lazy" />
+            <div class="img-slider">
+                ${imgHtml}
+                ${controlsHtml}
+            </div>
             <div class="product-info">
                 <h3>${p.name}</h3>
                 <span class="product-category">${p.category}</span>
@@ -90,8 +189,11 @@ function renderCatalogue(products, categoryFilter = 'all') {
                     <i class="fab fa-whatsapp"></i> Order via WhatsApp
                 </a>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
+
+    // Initialize sliders immediately after rendering
+    document.querySelectorAll('.img-slider').forEach(slider => setupSlider(slider));
 }
 
 // ===== Catalogue: Build Category Filters (Buttons + Dropdown) =====
@@ -216,6 +318,7 @@ function renderAdminTable(products) {
             <td>${p.name}</td>
             <td>${p.category}</td>
             <td>KSh ${Number(p.price).toFixed(2)}</td>
+            <td>${p.image_url_back ? '✅ 2 Images' : '📷 1 Image'}</td>
             <td>
                 <button class="action-btn btn-edit" data-id="${p.id}">Edit</button>
                 <button class="action-btn btn-delete" data-id="${p.id}">Delete</button>
@@ -252,8 +355,13 @@ function openEditModal(id) {
     document.getElementById('product-category').value = product.category_id;
     document.getElementById('product-price').value = product.price;
     document.getElementById('product-description').value = product.description || '';
-    document.getElementById('product-image-url').value = product.image_url || '';
-    document.getElementById('product-image-file').value = '';
+    
+    // Update with front and back images
+    document.getElementById('product-image-front-url').value = product.image_url || '';
+    document.getElementById('product-image-back-url').value = product.image_url_back || '';
+    
+    document.getElementById('product-image-front-file').value = '';
+    document.getElementById('product-image-back-file').value = '';
     document.getElementById('product-modal').style.display = 'flex';
 }
 
@@ -261,7 +369,8 @@ function openAddModal() {
     document.getElementById('modal-title').textContent = 'Add New Product';
     document.getElementById('product-id').value = '';
     document.getElementById('product-form').reset();
-    document.getElementById('product-image-file').value = '';
+    document.getElementById('product-image-front-file').value = '';
+    document.getElementById('product-image-back-file').value = '';
     document.getElementById('product-modal').style.display = 'flex';
 }
 
@@ -273,11 +382,18 @@ async function handleProductSubmit(e) {
     formData.append('category_id', document.getElementById('product-category').value);
     formData.append('price', document.getElementById('product-price').value);
     formData.append('description', document.getElementById('product-description').value.trim());
-    formData.append('image_url', document.getElementById('product-image-url').value.trim());
     
-    const fileInput = document.getElementById('product-image-file');
-    if (fileInput.files && fileInput.files[0]) {
-        formData.append('image_file', fileInput.files[0]);
+    // Append front and back image URLs
+    formData.append('image_url', document.getElementById('product-image-front-url').value.trim());
+    formData.append('image_url_back', document.getElementById('product-image-back-url').value.trim());
+    
+    const frontFile = document.getElementById('product-image-front-file');
+    const backFile = document.getElementById('product-image-back-file');
+    if (frontFile.files && frontFile.files[0]) {
+        formData.append('image_file', frontFile.files[0]);
+    }
+    if (backFile.files && backFile.files[0]) {
+        formData.append('image_file_back', backFile.files[0]);
     }
 
     const url = id ? `${API_BASE}/${id}` : API_BASE;
