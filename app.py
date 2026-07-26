@@ -45,6 +45,10 @@ def upload_to_supabase(file):
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
 
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('static', 'robots.txt')
+
 @app.route('/')
 def index():
     return render_template('index.html')
