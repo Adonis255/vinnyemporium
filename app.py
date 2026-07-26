@@ -1,5 +1,6 @@
 import os
 import uuid
+from flask import send_from_directory
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -40,6 +41,10 @@ def upload_to_supabase(file):
         return None
 
 # ---------- Routes ----------
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory('static', 'sitemap.xml')
+
 @app.route('/')
 def index():
     return render_template('index.html')
