@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://vinnyemporium.com/static/sitemap.xml
