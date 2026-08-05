@@ -125,7 +125,80 @@ function setupSlider(slider) {
     startAutoPlay();
 }
 
-// ===== Render Catalogue =====
+// ===== NEW: MODAL SLIDER (Manual only, NO auto-play) =====
+function setupModalSlider(images) {
+    const modalImg = document.getElementById('modal-product-image');
+    const dotsContainer = document.querySelector('.modal-dots');
+    const prevBtn = document.querySelector('.modal-prev');
+    const nextBtn = document.querySelector('.modal-next');
+    let currentIdx = 0;
+
+    // Reset dots
+    dotsContainer.innerHTML = '';
+    
+    // If only 1 image, hide arrows and dots
+    if (images.length === 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        dotsContainer.style.display = 'none';
+        modalImg.src = images[0];
+        modalImg.classList.add('active-img');
+        return;
+    }
+
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    dotsContainer.style.display = 'flex';
+
+    // Create dots
+    images.forEach((_, idx) => {
+        const dot = document.createElement('span');
+        dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => { showImage(idx); });
+        dotsContainer.appendChild(dot);
+    });
+
+    function showImage(idx) {
+        currentIdx = idx;
+        modalImg.src = images[idx];
+        document.querySelectorAll('.modal-dots .dot').forEach((d, i) => {
+            d.classList.toggle('active', i === idx);
+        });
+    }
+
+    prevBtn.addEventListener('click', () => {
+        let nextIdx = (currentIdx - 1 + images.length) % images.length;
+        showImage(nextIdx);
+    });
+    nextBtn.addEventListener('click', () => {
+        let nextIdx = (currentIdx + 1) % images.length;
+        showImage(nextIdx);
+    });
+
+    // Show initial image
+    showImage(0);
+}
+
+// ===== NEW: MODAL HANDLING =====
+function openProductModal(product) {
+    const overlay = document.getElementById('product-modal-overlay');
+    document.getElementById('modal-product-title').textContent = product.name;
+    document.querySelector('.modal-category').textContent = product.category;
+    document.querySelector('.modal-price').textContent = `KSh ${Number(product.price).toFixed(2)}`;
+    document.querySelector('.modal-description').textContent = product.description || 'No description provided.';
+    
+    const waBtn = document.getElementById('modal-whatsapp-btn');
+    waBtn.href = `https://wa.me/254727552507?text=Hi%20Vinny%20Emporium!%20I%20want%20to%20order%20${encodeURIComponent(product.name)}%20for%20KSh%20${Number(product.price).toFixed(2)}`;
+    
+    // Setup modal images
+    const images = [product.image_url || 'https://via.placeholder.com/300x200?text=No+Image'];
+    if (product.image_url_back) images.push(product.image_url_back);
+    
+    setupModalSlider(images);
+    overlay.style.display = 'flex';
+}
+
+// ===== Render Catalogue (Updated for Modal Clicking) =====
 function renderCatalogue(products, categoryFilter = 'all') {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -173,7 +246,7 @@ function renderCatalogue(products, categoryFilter = 'all') {
         }
 
         return `
-        <div class="product-card" data-category="${p.category}">
+        <div class="product-card" data-category="${p.category}" data-id="${p.id}">
             <div class="img-slider">
                 ${imgHtml}
                 ${controlsHtml}
@@ -192,8 +265,23 @@ function renderCatalogue(products, categoryFilter = 'all') {
         </div>`;
     }).join('');
 
-    // Initialize sliders immediately after rendering
-    document.querySelectorAll('.img-slider').forEach(slider => setupSlider(slider));
+    // Initialize sliders AND attach modal click listener
+    document.querySelectorAll('.product-card').forEach(card => {
+        // Setup slider
+        const slider = card.querySelector('.img-slider');
+        if (slider) setupSlider(slider);
+
+        // Attach modal click listener to card (excluding WhatsApp, arrows, dots)
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('.whatsapp-btn')) return; // Don't open modal if WhatsApp was clicked
+            if (e.target.closest('.slider-nav')) return;   // Don't open modal if slider arrow was clicked
+            if (e.target.closest('.dot')) return;          // Don't open modal if dot was clicked
+            
+            const id = parseInt(this.dataset.id);
+            const product = allProducts.find(p => p.id === id);
+            if (product) openProductModal(product);
+        });
+    });
 }
 
 // ===== Catalogue: Build Category Filters (Buttons + Dropdown) =====
@@ -434,13 +522,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         buildCategoryFilters();
         setupSearch(); 
         renderCatalogue(allProducts, 'all'); 
+
+        // ===== NEW: Modal Close Events (Catalogue Page) =====
+        const modalOverlay = document.getElementById('product-modal-overlay');
+        if (modalOverlay) {
+            document.querySelector('.modal-close-btn').addEventListener('click', () => modalOverlay.style.display = 'none');
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) modalOverlay.style.display = 'none';
+            });
+        }
+        // ============================================
     }
 
     // Admin dashboard
     if (document.getElementById('product-table-body')) {
         await loadAllAdminData();
 
-        // ===== NEW: Admin Product Search Logic =====
+        // ===== ADMIN PRODUCT SEARCH LOGIC =====
         const adminSearch = document.getElementById('admin-product-search');
         if (adminSearch) {
             adminSearch.addEventListener('input', function() {
