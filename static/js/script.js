@@ -440,6 +440,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (document.getElementById('product-table-body')) {
         await loadAllAdminData();
 
+        // ===== NEW: Admin Product Search Logic =====
+        const adminSearch = document.getElementById('admin-product-search');
+        if (adminSearch) {
+            adminSearch.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                if (query === '') {
+                    renderAdminTable(allProducts); // Reset to full list
+                } else {
+                    // Filter by Name OR ID
+                    const filtered = allProducts.filter(p => 
+                        p.name.toLowerCase().includes(query) || 
+                        p.id.toString().includes(query)
+                    );
+                    renderAdminTable(filtered);
+                }
+            });
+        }
+        // ===========================================
+
         const addCatBtn = document.getElementById('add-category-btn');
         if (addCatBtn) {
             addCatBtn.addEventListener('click', async function() {
