@@ -499,15 +499,20 @@ function openAddModal() {
     document.getElementById('product-modal').style.display = 'flex';
 }
 
-// ===== UPDATED: HANDLE PRODUCT SUBMIT (RADIO SUPPORT & SAFETY CHECK) =====
+// ===== UPDATED: HANDLE PRODUCT SUBMIT (FIXED FOR MOBILE) =====
 async function handleProductSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('product-id').value;
 
-    // 🛡️ SAFETY CHECK: Prevent "Edits All" bug if ID is missing
-    if (!id) {
-        alert('ERROR: Product ID is missing. Please refresh the page and try again.');
-        return;
+    // 🛡️ FIXED SAFETY CHECK: Let new products save without an ID popup
+    let method = 'POST';
+    let url = API_BASE;
+
+    if (id) {
+        method = 'PUT';
+        url = `${API_BASE}/${id}`;
+    } else {
+        console.log("No ID found - proceeding as ADD NEW product");
     }
 
     // Get selected radio button value
@@ -533,9 +538,6 @@ async function handleProductSubmit(e) {
     if (backFile.files && backFile.files[0]) {
         formData.append('image_file_back', backFile.files[0]);
     }
-
-    const url = id ? `${API_BASE}/${id}` : API_BASE;
-    const method = id ? 'PUT' : 'POST';
 
     try {
         const res = await fetch(url, {
