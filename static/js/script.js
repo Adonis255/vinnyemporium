@@ -245,11 +245,27 @@ function renderCatalogue(products, categoryFilter = 'all') {
             `;
         }
 
+        // ===== ADDED: RIBBON LOGIC =====
+        let ribbonHtml = '';
+        if (p.status) {
+            let positionClass = '';
+            switch(p.status) {
+                case 'Discount Offer': positionClass = 'ribbon-top-left'; break;
+                case 'Few Pieces Selling': positionClass = 'ribbon-top-right'; break;
+                case 'Top Selling': positionClass = 'ribbon-bottom-left'; break;
+                case 'Latest Model': positionClass = 'ribbon-bottom-right'; break;
+                default: positionClass = 'ribbon-top-right'; break;
+            }
+            ribbonHtml = `<div class="product-ribbon ${positionClass}">${p.status}</div>`;
+        }
+        // =====================================
+
         return `
         <div class="product-card" data-category="${p.category}" data-id="${p.id}">
             <div class="img-slider">
                 ${imgHtml}
                 ${controlsHtml}
+                ${ribbonHtml} <!-- === RIBBON INJECTED === -->
             </div>
             <div class="product-info">
                 <h3>${p.name}</h3>

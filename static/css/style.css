@@ -1010,3 +1010,68 @@ footer {
     .modal-image-container { height: 250px; }
     .modal-box { padding: 1.5rem; }
 }
+/* ===== PRODUCT STATUS RIBBONS ===== */
+.product-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.img-slider {
+    position: relative;
+}
+
+.product-ribbon {
+    position: absolute;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    z-index: 15;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    pointer-events: none;
+    line-height: 1.2;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Position 1: Top Left (Red) - Discount Offer */
+.ribbon-top-left {
+    top: 10px;
+    left: 10px;
+    background: #e74c3c;
+}
+
+/* Position 2: Top Right (Orange) - Few Pieces Selling */
+.ribbon-top-right {
+    top: 10px;
+    right: 10px;
+    background: #e67e22;
+}
+
+/* Position 3: Bottom Left (Gold) - Top Selling */
+.ribbon-bottom-left {
+    bottom: 10px;
+    left: 10px;
+    background: #f1c40f;
+    color: #1a1a1a;
+}
+
+/* Position 4: Bottom Right (Blue) - Latest Model */
+.ribbon-bottom-right {
+    bottom: 10px;
+    right: 10px;
+    background: #3498db;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .product-ribbon {
+        font-size: 0.5rem;
+        padding: 4px 8px;
+    }
+    .ribbon-top-left { top: 6px; left: 6px; }
+    .ribbon-top-right { top: 6px; right: 6px; }
+    .ribbon-bottom-left { bottom: 6px; left: 6px; }
+    .ribbon-bottom-right { bottom: 6px; right: 6px; }
+}

@@ -26,14 +26,12 @@ def admin_required(f):
     return decorated_function
 
 def upload_to_supabase(file):
-    """Upload file to Supabase Storage bucket 'product-images' and return public URL"""
     if not supabase:
         return None
     ext = file.filename.split('.')[-1]
     filename = f"{uuid.uuid4()}.{ext}"
     try:
         response = supabase.storage.from_('product-images').upload(filename, file.read(), {'content-type': file.content_type})
-        # Get public URL
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/product-images/{filename}"
         return public_url
     except Exception as e:
@@ -86,7 +84,7 @@ def admin_dashboard():
 @app.route('/api/categories', methods=['GET'])
 def get_categories():
     if not supabase:
-        return jsonify(['Phones', 'Laptops', 'Audio'])  # fallback
+        return jsonify(['Phones', 'Laptops', 'Audio'])
     try:
         response = supabase.table('categories').select('*').order('id').execute()
         return jsonify(response.data)
@@ -119,7 +117,7 @@ def delete_category(cat_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# ---------- API: Products (with file upload + BACK IMAGE) ----------
+# ---------- API: Products (with status) ----------
 @app.route('/api/products', methods=['GET'])
 def get_products():
     if not supabase:
@@ -139,7 +137,8 @@ def get_products():
                 'price': item['price'],
                 'description': item.get('description', ''),
                 'image_url': item.get('image_url', ''),
-                'image_url_back': item.get('image_url_back', '')  # <--- Added back image
+                'image_url_back': item.get('image_url_back', ''),
+                'status': item.get('status', '')
             })
         return jsonify(data)
     except Exception as e:
@@ -154,17 +153,20 @@ def add_product():
         price = request.form.get('price')
         description = request.form.get('description', '')
         image_url = request.form.get('image_url', '')
-        image_url_back = request.form.get('image_url_back', '') # <--- Added back image
+        image_url_back = request.form.get('image_url_back', '')
+        status = request.form.get('status', '')
 
         if 'image_file' in request.files and request.files['image_file'].filename:
             file = request.files['image_file']
             uploaded_url = upload_to_supabase(file)
-            if uploaded_url: image_url = uploaded_url
+            if uploaded_url:
+                image_url = uploaded_url
 
-        if 'image_file_back' in request.files and request.files['image_file_back'].filename: # <--- Added back file
+        if 'image_file_back' in request.files and request.files['image_file_back'].filename:
             file = request.files['image_file_back']
             uploaded_url = upload_to_supabase(file)
-            if uploaded_url: image_url_back = uploaded_url
+            if uploaded_url:
+                image_url_back = uploaded_url
 
         if not name or not category_id or not price:
             return jsonify({'error': 'Name, category, and price are required'}), 400
@@ -175,13 +177,14 @@ def add_product():
             'price': float(price),
             'description': description,
             'image_url': image_url,
-            'image_url_back': image_url_back # <--- Added back image insert
+            'image_url_back': image_url_back,
+            'status': status
         }).execute()
-        
+
         product = result.data[0]
         cat_res = supabase.table('categories').select('name').eq('id', product['category_id']).execute()
         product['category'] = cat_res.data[0]['name'] if cat_res.data else 'Uncategorized'
-        product['image_url_back'] = product.get('image_url_back', '')
+        product['status'] = product.get('status', '')
         return jsonify(product), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -195,17 +198,20 @@ def update_product(product_id):
         price = request.form.get('price')
         description = request.form.get('description', '')
         image_url = request.form.get('image_url', '')
-        image_url_back = request.form.get('image_url_back', '') # <--- Added back image
+        image_url_back = request.form.get('image_url_back', '')
+        status = request.form.get('status', '')
 
         if 'image_file' in request.files and request.files['image_file'].filename:
             file = request.files['image_file']
             uploaded_url = upload_to_supabase(file)
-            if uploaded_url: image_url = uploaded_url
+            if uploaded_url:
+                image_url = uploaded_url
 
-        if 'image_file_back' in request.files and request.files['image_file_back'].filename: # <--- Added back file
+        if 'image_file_back' in request.files and request.files['image_file_back'].filename:
             file = request.files['image_file_back']
             uploaded_url = upload_to_supabase(file)
-            if uploaded_url: image_url_back = uploaded_url
+            if uploaded_url:
+                image_url_back = uploaded_url
 
         if not name or not category_id or not price:
             return jsonify({'error': 'Name, category, and price are required'}), 400
@@ -216,7 +222,8 @@ def update_product(product_id):
             'price': float(price),
             'description': description,
             'image_url': image_url,
-            'image_url_back': image_url_back # <--- Added back image update
+            'image_url_back': image_url_back,
+            'status': status
         }).eq('id', product_id).execute()
 
         if not result.data:
@@ -225,7 +232,7 @@ def update_product(product_id):
         product = result.data[0]
         cat_res = supabase.table('categories').select('name').eq('id', product['category_id']).execute()
         product['category'] = cat_res.data[0]['name'] if cat_res.data else 'Uncategorized'
-        product['image_url_back'] = product.get('image_url_back', '')
+        product['status'] = product.get('status', '')
         return jsonify(product)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
