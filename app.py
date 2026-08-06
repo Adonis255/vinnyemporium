@@ -47,6 +47,10 @@ def sitemap():
 def robots():
     return send_from_directory('static', 'robots.txt')
 
+@app.route('/site.webmanifest')
+def manifest():
+    return send_from_directory('static', 'site.webmanifest')
+
 @app.route('/')
 def index():
     return render_template('index.html')
