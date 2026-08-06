@@ -456,6 +456,7 @@ async function deleteProduct(id) {
     }
 }
 
+// ===== UPDATED: OPEN EDIT MODAL (RADIO SUPPORT) =====
 function openEditModal(id) {
     const product = allProducts.find(p => p.id == id);
     if (!product) return;
@@ -472,21 +473,47 @@ function openEditModal(id) {
     
     document.getElementById('product-image-front-file').value = '';
     document.getElementById('product-image-back-file').value = '';
+
+    // Set the correct radio button for status
+    const statusValue = product.status || '';
+    const radio = document.querySelector(`input[name="product_status"][value="${statusValue}"]`);
+    if (radio) {
+        radio.checked = true;
+    } else {
+        // If no match found, default to "None"
+        document.querySelector('input[name="product_status"][value=""]').checked = true;
+    }
+
     document.getElementById('product-modal').style.display = 'flex';
 }
 
+// ===== UPDATED: OPEN ADD MODAL (RADIO RESET) =====
 function openAddModal() {
     document.getElementById('modal-title').textContent = 'Add New Product';
     document.getElementById('product-id').value = '';
     document.getElementById('product-form').reset();
     document.getElementById('product-image-front-file').value = '';
     document.getElementById('product-image-back-file').value = '';
+    // Reset radio to "None"
+    document.querySelector('input[name="product_status"][value=""]').checked = true;
     document.getElementById('product-modal').style.display = 'flex';
 }
 
+// ===== UPDATED: HANDLE PRODUCT SUBMIT (RADIO SUPPORT & SAFETY CHECK) =====
 async function handleProductSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('product-id').value;
+
+    // 🛡️ SAFETY CHECK: Prevent "Edits All" bug if ID is missing
+    if (!id) {
+        alert('ERROR: Product ID is missing. Please refresh the page and try again.');
+        return;
+    }
+
+    // Get selected radio button value
+    const selectedStatus = document.querySelector('input[name="product_status"]:checked');
+    const status = selectedStatus ? selectedStatus.value : '';
+
     const formData = new FormData();
     formData.append('name', document.getElementById('product-name').value.trim());
     formData.append('category_id', document.getElementById('product-category').value);
@@ -496,6 +523,7 @@ async function handleProductSubmit(e) {
     // Append front and back image URLs
     formData.append('image_url', document.getElementById('product-image-front-url').value.trim());
     formData.append('image_url_back', document.getElementById('product-image-back-url').value.trim());
+    formData.append('status', status);
     
     const frontFile = document.getElementById('product-image-front-file');
     const backFile = document.getElementById('product-image-back-file');
@@ -521,6 +549,7 @@ async function handleProductSubmit(e) {
         }
         document.getElementById('product-modal').style.display = 'none';
         await loadAllAdminData();
+        alert('✅ Product saved successfully! The ribbon will appear on the catalogue.');
     } catch (err) {
         alert('Error saving product: ' + err.message);
     }

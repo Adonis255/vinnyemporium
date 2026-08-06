@@ -205,6 +205,10 @@ def update_product(product_id):
         image_url_back = request.form.get('image_url_back', '')
         status = request.form.get('status', '')
 
+        # === DEBUG PRINT – check Vercel logs ===
+        print(f"🟢 Saving status for product {product_id}: {status}")
+        # =======================================
+
         if 'image_file' in request.files and request.files['image_file'].filename:
             file = request.files['image_file']
             uploaded_url = upload_to_supabase(file)

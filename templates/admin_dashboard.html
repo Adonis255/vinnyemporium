@@ -78,19 +78,7 @@
                     <label>Description</label>
                     <textarea id="product-description" rows="2"></textarea>
                 </div>
-
-                <!-- Status Dropdown -->
-                <div class="form-group">
-                    <label>Product Status / Badge</label>
-                    <select id="product-status">
-                        <option value="">None</option>
-                        <option value="Discount Offer">Discount Offer</option>
-                        <option value="Few Pieces Selling">Few Pieces Selling</option>
-                        <option value="Top Selling">Top Selling</option>
-                        <option value="Latest Model">Latest Model</option>
-                    </select>
-                </div>
-
+                
                 <div class="form-group" style="border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
                     <label><strong>Front Image</strong> (Upload file <em>or</em> paste URL)</label>
                     <input type="file" id="product-image-front-file" accept="image/*" />
@@ -102,6 +90,29 @@
                     <input type="file" id="product-image-back-file" accept="image/*" />
                     <input type="url" id="product-image-back-url" placeholder="https://..." style="margin-top:0.5rem;" />
                 </div>
+
+                <!-- ===== REPLACED DROPDOWN WITH RADIO BUTTONS ===== -->
+                <div class="form-group" style="border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+                    <label><strong>Select Product Badge</strong></label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size:0.9rem;">
+                            <input type="radio" name="product_status" value="" /> None
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size:0.9rem;">
+                            <input type="radio" name="product_status" value="Discount Offer" /> 🔴 Discount Offer
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size:0.9rem;">
+                            <input type="radio" name="product_status" value="Few Pieces Selling" /> 🟠 Few Pieces
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size:0.9rem;">
+                            <input type="radio" name="product_status" value="Top Selling" /> 🟡 Top Selling
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size:0.9rem;">
+                            <input type="radio" name="product_status" value="Latest Model" /> 🔵 Latest Model
+                        </label>
+                    </div>
+                </div>
+                <!-- =========================================== -->
 
                 <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Product</button>
             </form>
