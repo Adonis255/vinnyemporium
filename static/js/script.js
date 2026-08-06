@@ -38,6 +38,7 @@ async function fetchProducts() {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         allProducts = data;
+        console.log("🔥 API Data received:", data); // <--- DEBUGGING LINE
         return data;
     } catch (err) {
         console.error(err);
@@ -245,9 +246,11 @@ function renderCatalogue(products, categoryFilter = 'all') {
             `;
         }
 
-        // ===== ADDED: RIBBON LOGIC =====
+        // ===== RIBBON LOGIC WITH DEBUGGING =====
         let ribbonHtml = '';
-        if (p.status) {
+        console.log(`🛠️ Checking product: "${p.name}" - Status is: "${p.status}"`);
+        
+        if (p.status && p.status.trim() !== '') {
             let positionClass = '';
             switch(p.status) {
                 case 'Discount Offer': positionClass = 'ribbon-top-left'; break;
@@ -257,15 +260,18 @@ function renderCatalogue(products, categoryFilter = 'all') {
                 default: positionClass = 'ribbon-top-right'; break;
             }
             ribbonHtml = `<div class="product-ribbon ${positionClass}">${p.status}</div>`;
+            console.log(`✅ Ribbon created for "${p.name}" with class: ${positionClass}`);
+        } else {
+            console.log(`❌ No ribbon created for "${p.name}" because status is empty.`);
         }
-        // =====================================
+        // ==============================================
 
         return `
         <div class="product-card" data-category="${p.category}" data-id="${p.id}">
             <div class="img-slider">
                 ${imgHtml}
                 ${controlsHtml}
-                ${ribbonHtml} <!-- === RIBBON INJECTED === -->
+                ${ribbonHtml}
             </div>
             <div class="product-info">
                 <h3>${p.name}</h3>
