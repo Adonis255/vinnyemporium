@@ -456,7 +456,7 @@ async function deleteProduct(id) {
     }
 }
 
-// ===== UPDATED: OPEN EDIT MODAL (RADIO SUPPORT) =====
+// ===== UPDATED: OPEN EDIT MODAL (RADIO SUPPORT + LIVE CHECK) =====
 function openEditModal(id) {
     const product = allProducts.find(p => p.id == id);
     if (!product) return;
@@ -485,9 +485,12 @@ function openEditModal(id) {
     }
 
     document.getElementById('product-modal').style.display = 'flex';
+    
+    // Attach the live duplicate checker safely
+    setTimeout(setupLiveNameCheck, 150);
 }
 
-// ===== UPDATED: OPEN ADD MODAL (RADIO RESET) =====
+// ===== UPDATED: OPEN ADD MODAL (RADIO RESET + LIVE CHECK) =====
 function openAddModal() {
     document.getElementById('modal-title').textContent = 'Add New Product';
     document.getElementById('product-id').value = '';
@@ -497,6 +500,57 @@ function openAddModal() {
     // Reset radio to "None"
     document.querySelector('input[name="product_status"][value=""]').checked = true;
     document.getElementById('product-modal').style.display = 'flex';
+
+    // Attach the live duplicate checker safely
+    setTimeout(setupLiveNameCheck, 150);
+}
+
+// ===== LIVE DUPLICATE CHECK (Triggers on blur / Enter) =====
+function setupLiveNameCheck() {
+    const nameInput = document.getElementById('product-name');
+    if (!nameInput) return;
+
+    // Prevent duplicate event listeners from stacking up
+    const newInput = nameInput.cloneNode(true);
+    nameInput.parentNode.replaceChild(newInput, nameInput);
+
+    // Helper to reset border
+    const resetBorder = () => { newInput.style.borderColor = '#ddd'; };
+
+    // Event: Clicking out (Blur)
+    newInput.addEventListener('blur', function() {
+        const currentId = document.getElementById('product-id').value;
+        const val = this.value.trim();
+
+        if (val === '') {
+            resetBorder();
+            return;
+        }
+
+        // Check against allProducts
+        const isDuplicate = allProducts.some(p => {
+            if (currentId) {
+                return p.id != currentId && p.name.toLowerCase() === val.toLowerCase();
+            } else {
+                return p.name.toLowerCase() === val.toLowerCase();
+            }
+        });
+
+        if (isDuplicate) {
+            alert('ERROR: A product with this name already exists in the catalogue! Please use a different name.');
+            this.style.borderColor = '#e74c3c'; // Turn red
+        } else {
+            resetBorder();
+        }
+    });
+
+    // Event: Pressing Enter
+    newInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent accidental form submission
+            this.blur(); // Trigger the blur check
+        }
+    });
 }
 
 // ===== UPDATED: HANDLE PRODUCT SUBMIT (DUPLICATE CHECK & FIXED SAFETY) =====
