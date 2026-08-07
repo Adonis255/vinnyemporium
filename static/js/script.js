@@ -499,10 +499,30 @@ function openAddModal() {
     document.getElementById('product-modal').style.display = 'flex';
 }
 
-// ===== UPDATED: HANDLE PRODUCT SUBMIT (FIXED FOR MOBILE) =====
+// ===== UPDATED: HANDLE PRODUCT SUBMIT (DUPLICATE CHECK & FIXED SAFETY) =====
 async function handleProductSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('product-id').value;
+    const nameInput = document.getElementById('product-name').value.trim();
+
+    // ==============================================================
+    // 🚀 DUPLICATE PRODUCT CHECK (Prevents two products with same name)
+    // ==============================================================
+    const isDuplicate = allProducts.some(p => {
+        if (id) {
+            // If editing, check against ALL OTHER products except this one
+            return p.id != id && p.name.toLowerCase() === nameInput.toLowerCase();
+        } else {
+            // If adding new, check against ALL products
+            return p.name.toLowerCase() === nameInput.toLowerCase();
+        }
+    });
+
+    if (isDuplicate) {
+        alert('ERROR: A product with this name already exists in the catalogue! Please use a different name.');
+        return; // ⛔ Stops the save immediately
+    }
+    // ==============================================================
 
     // 🛡️ FIXED SAFETY CHECK: Let new products save without an ID popup
     let method = 'POST';
@@ -520,7 +540,7 @@ async function handleProductSubmit(e) {
     const status = selectedStatus ? selectedStatus.value : '';
 
     const formData = new FormData();
-    formData.append('name', document.getElementById('product-name').value.trim());
+    formData.append('name', nameInput);
     formData.append('category_id', document.getElementById('product-category').value);
     formData.append('price', document.getElementById('product-price').value);
     formData.append('description', document.getElementById('product-description').value.trim());
